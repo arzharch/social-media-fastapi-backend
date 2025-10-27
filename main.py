@@ -15,6 +15,16 @@ class Post(BaseModel):
 my_posts=[{"title":"title of post 1", "content":"content of post 1", "id":1},
           {"title":"title of post 2", "content":"content of post 2", "id":2} ]
 
+def find_post(id):
+    for p in my_posts:
+        if p['id'] == id:
+            return p
+        
+def find_index_post(id):
+    for i, p  in enumerate(my_posts):
+        if p["id"]==id:
+            return i
+
 
 @app.get("/")
 async def root():
@@ -35,13 +45,23 @@ async def create_posts(post : Post):
 async def get_latest_post():
     return my_posts[-1]
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}",status_code=status.HTTP_200_OK)
 async def get_post(id: int, response: Response):
-    for post in my_posts:
-        if post['id'] == id:
-            return {"post_detail": post}
-    #response.status_code = status.HTTP_404_NOT_FOUND
+    
+    
+    if not find_post(id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found")
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found")
+    return {"data":find_post(id)}
 
-    return
+
+
+
+@app.delete("/posts/{id}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(id: int):
+    index=find_index_post(id)
+    if index is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist") 
+    my_posts.pop(index)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

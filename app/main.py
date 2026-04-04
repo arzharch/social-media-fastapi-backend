@@ -3,13 +3,38 @@ from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Optional
 from random import randrange
+import psycopg2
+import os
+from psycopg2.extras import RealDictCursor
+import time
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 app=FastAPI()
+
+while True:
+    try:
+        conn=psycopg2.connect(host=os.getenv("POSTGRES_HOST"), database=os.getenv("POSTGRES_DATABASE"),user=os.getenv("POSTGRES_USER"), password=os.getenv("POSTGRES_PASSWORD"), cursor_factory=RealDictCursor)
+
+        cursor=conn.cursor()
+
+        print("Database connection was successful")
+        break
+
+    except Exception as error:
+        print(f"Database connection failued due to {error}")
+        time.sleep(2)
+
+
+
+
 
 class Post(BaseModel):
     title :str
     content : str
-    pulbished : bool = False
+    published : bool = False
     rating: Optional[int] = None
 
 my_posts=[{"title":"title of post 1", "content":"content of post 1", "id":1},
@@ -24,6 +49,9 @@ def find_index_post(id):
     for i, p  in enumerate(my_posts):
         if p["id"]==id:
             return i
+        
+
+
 
 
 @app.get("/")

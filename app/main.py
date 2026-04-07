@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException,Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Optional
@@ -8,9 +8,14 @@ import os
 from psycopg2.extras import RealDictCursor
 import time
 from dotenv import load_dotenv
+from . import models
+from .database import engine, get_db
+from sqlalchemy.orm import Session
+
 
 load_dotenv()
 
+models.Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
 
@@ -26,8 +31,6 @@ while True:
     except Exception as error:
         print(f"Database connection failued due to {error}")
         time.sleep(2)
-
-
 
 
 
@@ -59,14 +62,14 @@ async def root():
     return "Hello, World!"
 
 @app.get("/posts")
-async def get_posts():
-    cursor.execute(""" SELECT * FROM posts""")
-    posts=cursor.fetchall()
+async def get_posts(db: Session = Depends(get_db)):
+    
+    posts=db.query(models.Post).all() #gets all the rows
 
     return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-async def create_posts(post : Post): 
+async def create_posts(post : Post, db: Session  =Depends(get_db)): 
     cursor.execute(""" INSERT into posts (title, content, published) VALUES(%s, %s, %s) RETURNING *""", (post.title, post.content, post.published))
     
     new_post=cursor.fetchone()

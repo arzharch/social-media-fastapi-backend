@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, status, HTTPException,Depends
 from fastapi.params import Body
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional,List
 from random import randrange
 import psycopg2
 import os
@@ -37,14 +37,14 @@ while True:
 async def root():
     return "Hello, World!"
 
-@app.get("/posts")
+@app.get("/posts",response_model=List[schemas.Post])
 async def get_posts(db: Session = Depends(get_db)):
     
     posts=db.query(models.Post).all() #gets all the rows
 
-    return {"data": posts}
+    return posts
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
 async def create_posts(post : schemas.PostCreate, db: Session  =Depends(get_db)): 
 
     new_post=models.Post(**post.dict())
@@ -53,22 +53,20 @@ async def create_posts(post : schemas.PostCreate, db: Session  =Depends(get_db))
     db.refresh(new_post) 
 
     
-    return {"data" : new_post}
+    return new_post
 
 
-@app.get("/posts/{id}",status_code=status.HTTP_200_OK)
+@app.get("/posts/{id}",status_code=status.HTTP_200_OK,response_model=schemas.Post)
 async def get_post(id: int, db: Session = Depends(get_db)):
 
     post = db.query(models.Post).filter(models.Post.id == id).first()
-    print(post)
-
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id = {id} was not found")
     
-    return {"data":post}
+    return post
 
 
-@app.put("/posts/{id}",status_code=status.HTTP_200_OK)
+@app.put("/posts/{id}",status_code=status.HTTP_200_OK,response_model=schemas.Post)
 async def update_post(id: int, post: schemas.PostCreate, db : Session = Depends(get_db)): #Post is used here so that it sticks to the schema defined in Post class
     
     post_query= db.query(models.Post).filter(models.Post.id == id)
@@ -80,7 +78,7 @@ async def update_post(id: int, post: schemas.PostCreate, db : Session = Depends(
     db.commit()
 
 
-    return {"data":post_query.first()}
+    return post_query.first()
 
 
 @app.delete("/posts/{id}",status_code=status.HTTP_204_NO_CONTENT)

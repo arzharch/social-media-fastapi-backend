@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from . import models, schemas
 from .database import engine, get_db
 from sqlalchemy.orm import Session
+from pwdlib import PasswordHash
+from passlib.context import CryptContext
 
 
 load_dotenv()
@@ -18,6 +20,8 @@ load_dotenv()
 models.Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
+
+password_hash=PasswordHash.recommended()
 
 while True:
     try:
@@ -93,3 +97,16 @@ async def delete_post(id: int, db : Session = Depends(get_db)):
 
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post("/users",status_code=status.HTTP_201_CREATED, response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db:Session=Depends(get_db)):
+
+    user.password=password_hash.hash(user.password)
+
+    new_user=models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user

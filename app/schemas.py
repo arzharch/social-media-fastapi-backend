@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 class PostBase(BaseModel):
@@ -17,3 +17,12 @@ class Post(PostBase):
 
     class Config:
         orm_mode=True  #ensures that pydantic model reads data even if it not dict.
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class User(BaseModel):
+    email: EmailStr
+    id: int
+    created_at : datetime

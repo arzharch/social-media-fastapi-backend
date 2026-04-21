@@ -8,15 +8,15 @@ from typing import List
 
 router=APIRouter(prefix="/posts", tags=['Posts'])
 
-@router.get("/",response_model=List[schemas.Post])
-async def get_posts(db: Session = Depends(get_db)):
+@router.get("/",response_model=List[schemas.Post] )
+async def get_posts(db: Session = Depends(get_db), user_id : int = Depends(oauth2.get_current_user)):
     
-    posts=db.query(models.Post).all() #gets all the rows
+    posts=db.query(models.Post).all()
 
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
-async def create_posts(post : schemas.PostCreate, db: Session  =Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)): 
+async def create_posts(post : schemas.PostCreate, db: Session  =Depends(get_db), user_id: int = Depends(oauth2.get_current_user)): 
 
     new_post=models.Post(**post.dict())
     db.add(new_post)
@@ -28,7 +28,7 @@ async def create_posts(post : schemas.PostCreate, db: Session  =Depends(get_db),
 
 
 @router.get("/{id}",status_code=status.HTTP_200_OK,response_model=schemas.Post)
-async def get_post(id: int, db: Session = Depends(get_db)):
+async def get_post(id: int, db: Session = Depends(get_db), user_id : int = Depends(oauth2.get_current_user)):
 
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
@@ -38,7 +38,7 @@ async def get_post(id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{id}",status_code=status.HTTP_200_OK,response_model=schemas.Post)
-async def update_post(id: int, post: schemas.PostCreate, db : Session = Depends(get_db)): #Post is used here so that it sticks to the schema defined in Post class
+async def update_post(id: int, post: schemas.PostCreate, db : Session = Depends(get_db), user_id : int = Depends(oauth2.get_current_user)): #Post is used here so that it sticks to the schema defined in Post class
     
     post_query= db.query(models.Post).filter(models.Post.id == id)
 
@@ -53,7 +53,7 @@ async def update_post(id: int, post: schemas.PostCreate, db : Session = Depends(
 
 
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(id: int, db : Session = Depends(get_db)):
+async def delete_post(id: int, db : Session = Depends(get_db), user_id : int = Depends(oauth2.get_current_user)):
     
     post_query = db.query(models.Post).filter(models.Post.id == id)
     if not post_query.first():

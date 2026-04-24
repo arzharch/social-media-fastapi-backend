@@ -1,18 +1,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
+from .config import settings
 from dotenv import load_dotenv
 from urllib.parse import quote
 
 
-load_dotenv()
-POSTGRES_PASSWORD=os.getenv("POSTGRES_PASSWORD")
-POSTGRES_PASSWORD=quote(POSTGRES_PASSWORD) #to handle special characters in password
-POSTGRES_HOST=os.getenv("POSTGRES_HOST")
-POSTGRES_DATABASE=os.getenv("POSTGRES_DATABASE")
-POSTGRES_USER=os.getenv("POSTGRES_USER")
-
+POSTGRES_USER = settings.POSTGRES_USER
+POSTGRES_PASSWORD = quote(settings.POSTGRES_PASSWORD) #quote is used to encode special characters    
+POSTGRES_HOST = settings.POSTGRES_HOST
+POSTGRES_DATABASE = settings.POSTGRES_DATABASE
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DATABASE}"
 

@@ -1,8 +1,7 @@
 import jwt
-import os
 import dotenv
 from datetime import datetime, timedelta
-from . import schemas, database, models
+from . import schemas, database, models, config
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException, Depends, status
@@ -10,10 +9,9 @@ from fastapi import HTTPException, Depends, status
 
 oauth2_scheme=OAuth2PasswordBearer(tokenUrl='login')
 
-dotenv.load_dotenv()
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+SECRET_KEY = config.settings.SECRET_KEY
+ALGORITHM = config.settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = int(config.settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
 
 def create_access_token(data : dict):

@@ -11,11 +11,18 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass # inherits all from Postbase
 
+class User(BaseModel):
+    email: EmailStr
+    id: int
+    created_at : datetime
+
+
 
 class Post(PostBase):
     id:int
     user_id: int
     created_at: datetime
+    owner: User
 
     class Config:
         orm_mode=True  #ensures that pydantic model reads data even if it not dict.
@@ -28,10 +35,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class User(BaseModel):
-    email: EmailStr
-    id: int
-    created_at : datetime
 
 
 class Token(BaseModel):

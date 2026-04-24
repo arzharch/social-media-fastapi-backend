@@ -14,6 +14,7 @@ class PostCreate(PostBase):
 
 class Post(PostBase):
     id:int
+    user_id: int
     created_at: datetime
 
     class Config:

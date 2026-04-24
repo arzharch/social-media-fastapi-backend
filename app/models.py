@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean, text, TIMESTAMP
+from sqlalchemy import Column, Integer, String, Boolean, text, TIMESTAMP, ForeignKey
 
 class Post(Base):
     __tablename__="posts"
@@ -8,6 +8,7 @@ class Post(Base):
     content=Column(String,nullable=False)
     published=Column(Boolean, default=False)
     created_at=Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
+    user_id=Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False) #foreign key to users table, ondelete cascade means if user is deleted then all his posts will be deleted as well
 
 
 class User(Base):
@@ -16,3 +17,4 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password=Column(String, nullable=False)
     created_at=Column(TIMESTAMP(timezone=True), server_default=text('now()'), nullable=False)
+

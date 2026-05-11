@@ -2,7 +2,7 @@ from fastapi import FastAPI,Depends
 from dotenv import load_dotenv
 from . import models
 from .database import engine
-from .routers import post, user, auth
+from .routers import post, user, auth, vote
 
 load_dotenv()
 
@@ -19,6 +19,7 @@ async def root():
 app.include_router(router=post.router)
 app.include_router(router=user.router)
 app.include_router(router=auth.router)
+app.include_router(router=vote.router)
 
 
 

@@ -25,7 +25,14 @@ class Post(PostBase):
     owner: User
 
     class Config:
-        orm_mode=True  #ensures that pydantic model reads data even if it not dict.
+        from_attributes=True  #ensures that pydantic model reads data even if it not dict.
+
+class PostOut(BaseModel):
+    Post: Post
+    votes: int
+
+    class Config:
+        from_attributes=True
 
 class UserCreate(BaseModel):
     email: EmailStr

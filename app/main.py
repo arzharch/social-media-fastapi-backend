@@ -6,7 +6,7 @@ from .routers import post, user, auth, vote
 
 load_dotenv()
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
 

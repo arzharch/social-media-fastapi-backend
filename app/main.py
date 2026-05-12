@@ -1,4 +1,5 @@
 from fastapi import FastAPI,Depends
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from . import models
 from .database import engine
@@ -15,6 +16,13 @@ app=FastAPI()
 async def root():
     return "Hello, World!"
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True
+)
 
 app.include_router(router=post.router)
 app.include_router(router=user.router)

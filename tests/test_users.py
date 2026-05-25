@@ -2,57 +2,26 @@ from fastapi.testclient import TestClient
 from app import schemas
 from app.database import get_db
 from app.main import app
-from app.config import settings
-from urllib.parse import quote
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from app import models
 import pytest
 from alembic import command
+from tests.database import session,client
+from app import schemas
+from app import oauth2
+import jwt
+from app.config import settings
 
+@pytest.fixture(scope="function")
+def test_user(client):
+    user_data = {"email" : "test@example.com", "password": "password@123"}
+    res = client.post("/users", json = user_data)
+    assert res.status_code == 201
 
-POSTGRES_USER = settings.POSTGRES_USER
-POSTGRES_PASSWORD = quote(settings.POSTGRES_PASSWORD) #quote is used to encode special characters    
-POSTGRES_HOST = settings.POSTGRES_HOST
-POSTGRES_DATABASE = settings.POSTGRES_DATABASE
+    new_user = res.json()
+    new_user['password'] = user_data['password']
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/fastapi_test"
+    return new_user
 
-engine= create_engine(SQLALCHEMY_DATABASE_URL) 
-
-TestSessionLocal= sessionmaker(autocommit=False,autoflush=False, bind=engine) #default setup values
-
-Base= declarative_base() 
-
-
-@pytest.fixture
-def session():
-    models.Base.metadata.drop_all(bind=engine)
-    models.Base.metadata.create_all(bind=engine)
-    #command.downgrade("base") with alembic
-    #command.upgrade("head")
-    
-    db = TestSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@pytest.fixture
-def client(session):
-    #dependency to get DB session
-    def override_get_db():
-        db=TestSessionLocal()
-        try:
-            yield session
-        finally:
-            session.close()
-    
-    app.dependency_overrides[get_db] = override_get_db
-    
-    yield TestClient(app)
-    
 
 def test_root(client):
 
@@ -67,3 +36,20 @@ def test_create_user(client):
     assert res.status_code == 201
     assert res.json().get("email") == "test@example.com"
     assert res.json().get("id") == new_user.id
+
+
+def test_login(client, test_user):
+
+    res = client.post("/login", data= {"username":test_user['email'], "password":test_user['password']})
+    #user = schemas.UserLogin(**res.json())
+
+    login_res = schemas.Token(**res.json())
+
+    payload = jwt.decode(login_res.access_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
+    user_id = payload.get("user_id")
+    assert login_res.token_type == "bearer"
+    assert user_id == test_user['id']
+
+    assert res.status_code == 200
+                                      

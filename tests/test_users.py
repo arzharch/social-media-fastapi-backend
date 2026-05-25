@@ -5,22 +5,12 @@ from app.main import app
 from app import models
 import pytest
 from alembic import command
-from tests.database import session,client
 from app import schemas
 from app import oauth2
 import jwt
 from app.config import settings
 
-@pytest.fixture(scope="function")
-def test_user(client):
-    user_data = {"email" : "test@example.com", "password": "password@123"}
-    res = client.post("/users", json = user_data)
-    assert res.status_code == 201
 
-    new_user = res.json()
-    new_user['password'] = user_data['password']
-
-    return new_user
 
 
 def test_root(client):

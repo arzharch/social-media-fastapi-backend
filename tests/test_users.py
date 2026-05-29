@@ -28,7 +28,7 @@ def test_create_user(client):
     assert res.json().get("id") == new_user.id
 
 
-def test_login(client, test_user):
+def test_login_user(client, test_user):
 
     res = client.post("/login", data= {"username":test_user['email'], "password":test_user['password']})
     #user = schemas.UserLogin(**res.json())
@@ -42,4 +42,17 @@ def test_login(client, test_user):
     assert user_id == test_user['id']
 
     assert res.status_code == 200
+
+
+@pytest.mark.parametrize("email, password, status_code",
+                         [("test@example.com", "wrongpassword", 403),
+                          ("nonexistent@example.com", "password123", 403),
+                          ("", "password123", 403),
+                          ("test@example.com", "", 403)])
+def test_incorrect_login(client, test_user, email, password, status_code):
+
+    res = client.post("/login", data={"username": email, "password": password})
+    print(res.json())
+
+    assert res.status_code == status_code
                                       

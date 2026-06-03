@@ -10,14 +10,13 @@ on:
 jobs:
   job1:
     env:
-      POSTGRES_PASSWORD=${{secrets.POSTGRES_PASSWORD}}
-      POSTGRES_HOST=${{secrets.POSTGRES_HOST}}
-      POSTGRES_DATABASE=${{secrets.POSTGRES_DATABASE}}
-      POSTGRES_USER=${{secrets.POSTGRES_USER}}
-
-      ALGORITHM=${{secrets.ALGORITHM}}  
-      SECRET_KEY=${{secrets.SECRET_KEY}}
-      ACCESS_TOKEN_EXPIRE_MINUTES=${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
+      POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+      POSTGRES_HOST: ${{secrets.POSTGRES_HOST}}
+      POSTGRES_DATABASE: ${{secrets.POSTGRES_DATABASE}}
+      POSTGRES_USER: ${{secrets.POSTGRES_USER}}
+      ALGORITHM: ${{secrets.ALGORITHM}}
+      SECRET_KEY: ${{secrets.SECRET_KEY}}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{secrets.ACCESS_TOKEN_EXPIRE_MINUTES}}
 
     services:
       postgres:
